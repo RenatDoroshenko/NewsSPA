@@ -28,7 +28,10 @@ namespace NewsSPAWebApi.Controllers
         [HttpGet]
         public IEnumerable<News> Get()
         {
-            return _dbContext.News.ToList();
+            return _dbContext.News
+                .Include(n => n.Author)
+                .Include(n => n.Theme)
+                .ToList();
         }
 
         [HttpPost]
