@@ -1,0 +1,2 @@
+# NewsSPA
+Diploma Project
