@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NewsSPAWebApi.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,9 +16,12 @@ namespace NewsSPAWebApi.Controllers
     public class NewsController : ControllerBase
     {
         private NewsSPAContext _dbContext;
-        public NewsController(NewsSPAContext dbContext)
+        private readonly IWebHostEnvironment _env;
+
+        public NewsController(NewsSPAContext dbContext, IWebHostEnvironment env)
         {
             _dbContext = dbContext;
+            _env = env;
         }
 
 
@@ -51,6 +56,31 @@ namespace NewsSPAWebApi.Controllers
             _dbContext.SaveChanges();
 
             return new JsonResult("Deleted Successfully!");
+        }
+
+        [Route("SaveFile")]
+        [HttpPost]
+        public JsonResult SaveFile()
+        {
+
+            try
+            {
+                var httpRequest = Request.Form;
+                var postedFile = httpRequest.Files[0];
+                string filename = postedFile.FileName;
+                var physicalPath = _env.ContentRootPath + "/Images/" + filename;
+
+                using (var stream = new FileStream(physicalPath, FileMode.Create))
+                {
+                    postedFile.CopyTo(stream);
+                }
+
+                return new JsonResult(filename);
+            }
+            catch (Exception)
+            {
+                return new JsonResult("anonymous.png");
+            }
         }
     }
 }
